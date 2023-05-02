@@ -11,8 +11,9 @@ from Affichage import Affichage
 class MenuPrincipal(Affichage):
     def __init__(self, nbr_vivant, nbr_tour):
         # Création de la fenêtre principale
-        super().__init__(nom=f'Menu_principale', geometry=(1280,720), nb_cellues=0)
-        self.racine.iconbitmap("icone.ico")
+        super().__init__(nom=f'Menu_principal', geometry=(1280,720), nb_cellues=0)
+        icone = tk.PhotoImage(file="icon.png")
+        self.racine.iconphoto(True, icone)
 
         self.parametre = None
         self.nbr_vivant = nbr_vivant
@@ -208,9 +209,6 @@ class MenuPrincipal(Affichage):
                              font="System")
         self.text.pack(ipady=8, expand=True)
         
-        
-        
-
         self.curseur_nbr_vivant = tk.Scale(
             self.parametre,
             orient="horizontal",
@@ -230,9 +228,6 @@ class MenuPrincipal(Affichage):
         self.curseur_nbr_vivant.pack(ipady=6, expand=True)
         self.curseur_nbr_vivant.set(self.nbr_vivant)
         
-        
-
-
         self.curseur_nbr_tours = tk.Scale(
             self.parametre,
             orient="horizontal",
@@ -276,5 +271,5 @@ class MenuPrincipal(Affichage):
 
 if __name__ == "__main__":
     # Lancement de la fenêtre principale
-    menu_principal = MenuPrincipal(660, 1000)
+    menu_principal = MenuPrincipal(660, 100000)
     menu_principal.racine.mainloop()

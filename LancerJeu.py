@@ -11,6 +11,11 @@ import MenuPrincipal
 
 class LancerJeu:
     def __init__(self, nbr_vivant, nbr_tour, mode, grille):
+
+        # CHANGER ICI LA VITESSE SELON LE SYSTEME D'EXPLOITATION (Windows = 0, Linux = 0.05 ou 0.01)
+        self.vitesse = 0
+
+
         # Création de la fenêtre
         self.mode = mode  # Mode libre ou aléatoire
         self.grille = grille  # Grille de jeu permettant de garder la grille de départ en revenant au mode libre
@@ -26,7 +31,6 @@ class LancerJeu:
         # Configuration des touches
         self.racine.bind_all("<Key-Escape>", self.echap)
         self.racine.bind_all("<Key-F11>", self.fullscreen)
-        self.racine.bind_all("<Key-space>", self.speed)
         self.racine.bind_all("<Key-Return>", self.restart)
 
         # variables globales
@@ -36,13 +40,15 @@ class LancerJeu:
         self.taille_case = 19
         self.nombre_case_x = int(self.nombre_case_y * 2) - 1
         self.is_fullscreen = False
-        self.vitesse = 0.001
         self.frame_grille = tk.Frame(self.racine, bd=3, bg="white")
         self.cellule = []
-
+        self.seconde = 0
+        
+        
         # Appel des différentes fonctions
         self.plateau_GUI()
         self.creer_widgets()
+        self.timer()
         self.lancer_jeu()
 
     def creer_widgets(self):
@@ -65,22 +71,22 @@ class LancerJeu:
         # Affichage de la enième génération
         self.generation = tk.Label(
             self.frame_top,
-            text="1e génération",
+            text="1e tour",
             font=("System", 35),
             bg="#010D19",
             fg="#A5A5B5",
         )
         self.generation.place(relx=0.99, rely=0, anchor="ne")
 
-        # Affichage de la vitesse de jeu
-        self.text_vitesse = tk.Label(
+        # Affichage le timer
+        self.text_timer = tk.Label(
             self.frame_top,
-            text="Vitesse : x10",
+            text="00:00",
             font=("System", 35),
             bg="#010D19",
             fg="#A5A5B5",
         )
-        self.text_vitesse.place(relx=0.01, rely=0, anchor="nw")
+        self.text_timer.place(relx=0.01, rely=0, anchor="nw")
 
         # Affichage du nombre de cellules vivantes sur le nombre total de cellules
         self.compteur_vivant = tk.Label(
@@ -105,7 +111,7 @@ class LancerJeu:
         self.frame_bot.pack(fill=tk.X, pady=6, side=tk.BOTTOM)
         self.rappel_touches = tk.Label(
             self.frame_bot,
-            text="F11 : Activer/Désactiver plein écran               Espace : Changer la vitesse                 Entrée : Relancer le jeu               Echap : Revenir au menu principal",
+            text="F11 : Activer/Désactiver plein écran                 Entrée : Relancer le jeu               Echap : Revenir au menu principal",
             font=("System", 15),
             bg="#010D19",
             fg="#A5A5B5",
@@ -167,30 +173,26 @@ class LancerJeu:
 
                 self.racine.attributes("-fullscreen", True)
                 self.is_fullscreen = True
+    
 
-    def speed(self, event):
+    def timer(self):
         """
-        def: sur appui de la touche "espace", change la vitesse de lecture de l'algorithme
+        def: actualise le timer toutes les secondes
         in: None
         out: None
         """
-        if event.keysym == "space":
-            if self.vitesse == 0.05:
-                self.vitesse = 0.001
-                self.text_vitesse.config(text="Vitesse : x10")
-            elif self.vitesse == 0.001:
-                self.vitesse = 0.5
-                self.text_vitesse.config(text="Vitesse : x1")
-            elif self.vitesse == 0.5:
-                self.vitesse = 0.05
-                self.text_vitesse.config(text="Vitesse : x5")
-
+        
+        self.start_time = time.time()
+        
     def restart(self, event):
         """
         def: sur appui de la touche "entrée", relance le jeu de la vie
         in: None
         out: None
         """
+        # reset le timer
+        self.start_time = time.time()
+
         if event.keysym == "Return":
             self.jeu(
                 self.plateau(self.nombre_case_x, self.nombre_case_y, "X"),
@@ -198,6 +200,7 @@ class LancerJeu:
                 self.nombre_tour,
             )
 
+        
     def plateau_GUI(self):
         """
         def: Crée le plateau de jeu du GUI sous la forme d'une grille de canva
@@ -300,6 +303,12 @@ class LancerJeu:
         for i in range(tour + 1):
             vivant = 0
 
+            elapsed_time = int(time.time() - self.start_time) + self.seconde
+            minutes, seconds = divmod(elapsed_time, 60)
+            hours, minutes = divmod(minutes, 60)
+            time_string = "{:02d}:{:02d}".format(minutes, seconds)
+            self.text_timer.configure(text=time_string)
+
             # Création d'une grille temporaire pour parcourir la grille initiale sans la modifier
             grille_temp = copy.deepcopy(grille)
 
@@ -326,11 +335,10 @@ class LancerJeu:
                     # Changement de couleur de la cellule sur le GUI
                     self.cellule[ligne][colonne].config(bg=bg)
 
-            # pause entre chaque tour pour régler la vitesse de lecture
             time.sleep(self.vitesse)
 
             # affichages du nombre de tours effectués
-            gene = str(i) + "e génération"
+            gene = str(i) + "e tour"
             self.generation.config(text=gene)
 
             # affichaque du compteur de cellules vivantes

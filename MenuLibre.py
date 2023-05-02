@@ -74,6 +74,16 @@ class MenuLibre:
         )
         self.nom.place(relx=0.99, rely=0, anchor="ne")
 
+        # Affichage le timer
+        self.text_timer = tk.Label(
+            self.frame_top,
+            text="00:00",
+            font=("System", 35),
+            bg="#010D19",
+            fg="#A5A5B5",
+        )
+        self.text_timer.place(relx=0.01, rely=0, anchor="nw")
+
         # Bannière rappel des touches
         self.frame_bot = tk.Frame(
             self.racine,

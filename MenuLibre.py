@@ -8,12 +8,14 @@ import os
 
 
 class MenuLibre:
-    def __init__(self, nbr_vivant, nbr_tour, grille):
+    def __init__(self, nbr_vivant, nbr_cases, grille):
         self.grille = grille
         self.racine = tk.Tk()
         self.racine.title("Jeu de la vie - Mode Libre")
         self.racine.geometry("1280x720")
-        icone = tk.PhotoImage(file="icon.png")
+        icone = tk.PhotoImage(
+            file="/mnt/chromeos/MyFiles/Downloads/jeu-de-la-vie-Arkopad-V1.0.cest-la-derniere-promis (1)/jeu-de-la-vie-Arkopad-V1.0.cest-la-derniere-promis/icon.png"
+        )
         self.racine.iconphoto(True, icone)
         self.racine.resizable(0, 0)
         self.racine.config(background="#141418")
@@ -21,28 +23,26 @@ class MenuLibre:
         # Configuration des touches
         self.racine.bind_all("<Key-Escape>", self.echap)
         self.racine.bind_all("<Key-F1>", self.sauvegarder_fichier)
+        self.racine.bind_all("<KeyPress-s>", self.sauvegarder_fichier)
         self.racine.bind_all("<Key-F2>", self.charger_fichier)
+        self.racine.bind_all("<KeyPress-l>", self.charger_fichier)
         self.racine.bind_all("<Key-Return>", self.lancer_jeu)
         self.racine.bind_all("<Key-BackSpace>", self.reset)
 
         # variables globales
         self.nombre_vivant = nbr_vivant
-        self.nombre_tour = nbr_tour
-        self.nom_fichier = "Aucun fichier chargé"
+        self.nom_fichier = "No File"
         self.compteur_nbr_vivant = 0
 
-        self.nombre_case_y = 30
-        self.taille_case = 19
+        self.nombre_case_y = nbr_cases
         self.nombre_case_x = int(self.nombre_case_y * 2) - 1
         self.is_fullscreen = False
-        self.vitesse = 0.001
         self.frame_grille = tk.Frame(self.racine, bd=3, bg="white")
         self.cellule = []
 
         # Appel des différentes fonctions
-        self.plateau_GUI()
         self.creer_widgets()
-        
+        self.plateau_GUI()
 
     def creer_widgets(self):
         self.frame_top = tk.Frame(
@@ -103,6 +103,28 @@ class MenuLibre:
         )
         self.rappel_touches.pack()
 
+        # on met à jour la taille des cases et on affiche la grille
+
+        self.racine.update_idletasks()  # permet de mettre à jour la fenêtre (on utilise pas juste update par ce que des fois ca bug pour aucune raison)
+        self.racine.after(
+            150
+        )  # on ajoute un temps de pause pour etre sur que la taille de la fenetre est mise a jour sinon des fois ca bug
+        # on calcule la taille des cases en fonction de la taille de la fenetre et du nombre de cases (en pratique le min est toujours sur la hauteur)
+        self.taille_case = min(
+            (self.racine.winfo_width() - 50) / self.nombre_case_x,
+            (
+                self.racine.winfo_height()
+                - self.frame_top.winfo_height()
+                - self.frame_bot.winfo_height()
+                - 50
+            )
+            / self.nombre_case_y,
+        )
+        self.frame_grille.place(
+            x=self.racine.winfo_width() / 2 - self.nombre_case_x * self.taille_case / 2,
+            y=(self.racine.winfo_height() / 2 + 12)
+            - self.nombre_case_y * self.taille_case / 2,
+        )
 
     def echap(self, event):
         """
@@ -113,7 +135,7 @@ class MenuLibre:
         if event.keysym == "Escape":
             self.racine.destroy()
             menu_principal = MenuPrincipal.MenuPrincipal(
-                self.nombre_vivant, self.nombre_tour
+                self.nombre_vivant, self.nombre_case_y
             )
             menu_principal.racine.mainloop()
 
@@ -160,7 +182,7 @@ class MenuLibre:
 
             self.racine.destroy()
             jeu = LancerJeu.LancerJeu(
-                self.nombre_vivant, self.nombre_tour, "Libre", self.grille
+                self.nombre_vivant, self.nombre_case_y, "Libre", self.grille
             )
             jeu.racine.mainloop()
 
@@ -179,14 +201,14 @@ class MenuLibre:
                     self.frame_grille,
                     bg="black",
                     bd=0,
-                    height=19,
-                    width=19,
+                    height=self.taille_case,
+                    width=self.taille_case,
                     highlightthickness=0,
                 )
                 canva.grid(row=i, column=j)
                 liste.append(canva)
                 canva.bind("<Button-1>", self.change_couleur)
-            self.cellule.append(liste)      
+            self.cellule.append(liste)
 
         if self.grille != {}:
             liste = list(self.grille.values())[0]
@@ -195,15 +217,6 @@ class MenuLibre:
                     if liste[ligne][colonne] == "O":
                         self.cellule[ligne][colonne].config(bg="white")
                         self.compteur_nbr_vivant += 1
-        
-        
-        self.racine.update()
-        self.frame_grille.place(
-            x=self.racine.winfo_width() / 2
-            - self.nombre_case_x * self.taille_case / 2,
-            y=(self.racine.winfo_height() / 2 + 12)
-            - self.nombre_case_y * self.taille_case / 2,
-        )
 
     def change_couleur(self, event):
         canva = event.widget
@@ -225,7 +238,7 @@ class MenuLibre:
             )
 
     def sauvegarder_fichier(self, event):
-        if event.keysym == "F1":
+        if event.keysym == "F1" or event.keysym == "s":
             # Transformme la grille GUI en liste 2D avec des 'X' et des 'O'
             grille = []
             for ligne in range(len(self.cellule)):
@@ -251,8 +264,7 @@ class MenuLibre:
             self.nom.config(text=self.nom_fichier)
 
     def charger_fichier(self, event):
-        if event.keysym == "F2":
-
+        if event.keysym == "F2" or event.keysym == "l":
             # Lis le fichier csv et le transforme en une liste 2D
             grille = []
             file_path = filedialog.askopenfilename(

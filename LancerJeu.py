@@ -10,19 +10,19 @@ import MenuPrincipal
 
 
 class LancerJeu:
-    def __init__(self, nbr_vivant, nbr_tour, mode, grille):
-
+    def __init__(self, nbr_vivant, nbr_cases, mode, grille):
         # CHANGER ICI LA VITESSE SELON LE SYSTEME D'EXPLOITATION (Windows = 0, Linux = 0.05 ou 0.01)
         self.vitesse = 0
-
 
         # Création de la fenêtre
         self.mode = mode  # Mode libre ou aléatoire
         self.grille = grille  # Grille de jeu permettant de garder la grille de départ en revenant au mode libre
         self.racine = tk.Tk()
         self.racine.title("Jeu de la vie")
-        self.racine.geometry("1280x720")
-        icone = tk.PhotoImage(file="icon.png")
+        self.racine.geometry("1500x900")
+        icone = tk.PhotoImage(
+            file="/mnt/chromeos/MyFiles/Downloads/jeu-de-la-vie-Arkopad-V1.0.cest-la-derniere-promis (1)/jeu-de-la-vie-Arkopad-V1.0.cest-la-derniere-promis/icon.png"
+        )
         self.racine.iconphoto(True, icone)
         self.racine.resizable(0, 0)
         self.racine.config(background="#141418")
@@ -35,19 +35,17 @@ class LancerJeu:
 
         # variables globales
         self.nombre_vivant = nbr_vivant
-        self.nombre_tour = nbr_tour
-        self.nombre_case_y = 30
-        self.taille_case = 19
+        self.nombre_case_y = nbr_cases
         self.nombre_case_x = int(self.nombre_case_y * 2) - 1
         self.is_fullscreen = False
         self.frame_grille = tk.Frame(self.racine, bd=3, bg="white")
         self.cellule = []
         self.seconde = 0
-        
-        
+
         # Appel des différentes fonctions
-        self.plateau_GUI()
+
         self.creer_widgets()
+        self.plateau_GUI()
         self.timer()
         self.lancer_jeu()
 
@@ -118,11 +116,26 @@ class LancerJeu:
         )
         self.rappel_touches.pack()
 
-        # place la grille au centre de la fenêtre
-        self.racine.update()
+        # place la grille au centre de la fenêtre et calcule la taille des cases
+
+        self.racine.update_idletasks()  # permet de mettre à jour la fenêtre (on utilise pas juste update par ce que des fois ca bug pour aucune raison)
+        self.racine.after(
+            150
+        )  # on ajoute un temps de pause pour etre sur que la taille de la fenetre est mise a jour sinon des fois ca bug
+        # on calcule la taille des cases en fonction de la taille de la fenetre et du nombre de cases (en pratique le min est toujours sur la hauteur)
+        self.taille_case = min(
+            (self.racine.winfo_width() - 50) / self.nombre_case_x,
+            (
+                self.racine.winfo_height()
+                - self.frame_top.winfo_height()
+                - self.frame_bot.winfo_height()
+                - 50
+            )
+            / self.nombre_case_y,
+        )
+        # on place la grille au centre de la fenetre en fonction du nombre de cases et de leurs taille
         self.frame_grille.place(
-            x=self.racine.winfo_width() / 2
-            - self.nombre_case_x * self.taille_case / 2,
+            x=self.racine.winfo_width() / 2 - self.nombre_case_x * self.taille_case / 2,
             y=(self.racine.winfo_height() / 2 + 12)
             - self.nombre_case_y * self.taille_case / 2,
         )
@@ -138,7 +151,7 @@ class LancerJeu:
                 self.racine.destroy()
                 # Lancement du menu libre
                 menu_principal = MenuLibre.MenuLibre(
-                    self.nombre_vivant, self.nombre_tour, self.grille
+                    self.nombre_vivant, self.nombre_case_y, self.grille
                 )
                 menu_principal.racine.mainloop()
 
@@ -146,7 +159,7 @@ class LancerJeu:
                 self.racine.destroy()
                 # Lancement du menu principal
                 menu_principal = MenuPrincipal.MenuPrincipal(
-                    self.nombre_vivant, self.nombre_tour
+                    self.nombre_vivant, self.nombre_case_y
                 )
                 menu_principal.racine.mainloop()
 
@@ -173,7 +186,6 @@ class LancerJeu:
 
                 self.racine.attributes("-fullscreen", True)
                 self.is_fullscreen = True
-    
 
     def timer(self):
         """
@@ -181,9 +193,9 @@ class LancerJeu:
         in: None
         out: None
         """
-        
+
         self.start_time = time.time()
-        
+
     def restart(self, event):
         """
         def: sur appui de la touche "entrée", relance le jeu de la vie
@@ -197,10 +209,9 @@ class LancerJeu:
             self.jeu(
                 self.plateau(self.nombre_case_x, self.nombre_case_y, "X"),
                 self.nombre_vivant,
-                self.nombre_tour,
+                self.nombre_case_y,
             )
 
-        
     def plateau_GUI(self):
         """
         def: Crée le plateau de jeu du GUI sous la forme d'une grille de canva
@@ -215,14 +226,13 @@ class LancerJeu:
                     self.frame_grille,
                     bg="black",
                     bd=0,
-                    height=19,
-                    width=19,
+                    height=self.taille_case,
+                    width=self.taille_case,
                     highlightthickness=0,
                 )
                 canva.grid(row=i, column=j)
                 liste.append(canva)
             self.cellule.append(liste)
-        
 
     def plateau(self, x, y, charactere):
         """
@@ -299,8 +309,8 @@ class LancerJeu:
                         grille[ligne][colonne] = "O"
                         self.cellule[ligne][colonne].config(bg="white")
 
-        # lance le jeu de la vie pendant {tour} tours
-        for i in range(tour + 1):
+        # lance le jeu de la vie
+        for i in range(100000):
             vivant = 0
 
             elapsed_time = int(time.time() - self.start_time) + self.seconde
@@ -315,7 +325,6 @@ class LancerJeu:
             # Parcourt toutes les cellules
             for ligne in range(len(grille)):
                 for colonne in range(len(grille[0])):
-
                     # Incrémentation du compteur de cellules vivantes
                     if grille[ligne][colonne] == "O":
                         vivant += 1
@@ -352,11 +361,9 @@ class LancerJeu:
             # mise à jour de la fenêtre
             self.racine.update()
 
-            
-
     def lancer_jeu(self):
         self.jeu(
             self.plateau(self.nombre_case_x, self.nombre_case_y, "X"),
             self.nombre_vivant,
-            self.nombre_tour,
+            self.nombre_case_y,
         )

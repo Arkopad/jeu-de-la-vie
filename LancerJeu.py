@@ -3,8 +3,9 @@ import tkinter as tk
 from random import randint
 import copy
 import time
+from tkinter import messagebox
 
-# Importation des classes des différents modes de jeu
+# Importation des classes
 import MenuLibre
 import MenuPrincipal
 
@@ -15,14 +16,10 @@ class LancerJeu:
         self.vitesse = 0
 
         # Création de la fenêtre
-        self.mode = mode  # Mode libre ou aléatoire
-        self.grille = grille  # Grille de jeu permettant de garder la grille de départ en revenant au mode libre
         self.racine = tk.Tk()
         self.racine.title("Jeu de la vie")
-        self.racine.geometry("1500x900")
-        icone = tk.PhotoImage(
-            file="/mnt/chromeos/MyFiles/Downloads/jeu-de-la-vie-Arkopad-V1.0.cest-la-derniere-promis (1)/jeu-de-la-vie-Arkopad-V1.0.cest-la-derniere-promis/icon.png"
-        )
+        self.racine.geometry("1280x720")
+        icone = tk.PhotoImage(file="icon.png")
         self.racine.iconphoto(True, icone)
         self.racine.resizable(0, 0)
         self.racine.config(background="#141418")
@@ -31,9 +28,14 @@ class LancerJeu:
         # Configuration des touches
         self.racine.bind_all("<Key-Escape>", self.echap)
         self.racine.bind_all("<Key-F11>", self.fullscreen)
+        self.racine.bind_all("<Control-f>", self.fullscreen)
         self.racine.bind_all("<Key-Return>", self.restart)
+        self.racine.bind_all("<Key-F3>", self.affiche_touches)
+        self.racine.bind_all("<Control-t>", self.affiche_touches)
 
         # variables globales
+        self.mode = mode  # Mode libre ou aléatoire
+        self.grille = grille  # Grille de jeu permettant de garder la grille de départ en revenant au mode libre
         self.nombre_vivant = nbr_vivant
         self.nombre_case_y = nbr_cases
         self.nombre_case_x = int(self.nombre_case_y * 2) - 1
@@ -43,7 +45,6 @@ class LancerJeu:
         self.seconde = 0
 
         # Appel des différentes fonctions
-
         self.creer_widgets()
         self.plateau_GUI()
         self.timer()
@@ -55,7 +56,6 @@ class LancerJeu:
         in: None
         out: None
         """
-
         # Bannière supérieure
         self.frame_top = tk.Frame(
             self.racine,
@@ -76,7 +76,7 @@ class LancerJeu:
         )
         self.generation.place(relx=0.99, rely=0, anchor="ne")
 
-        # Affichage le timer
+        # Affichage du timer
         self.text_timer = tk.Label(
             self.frame_top,
             text="00:00",
@@ -109,15 +109,14 @@ class LancerJeu:
         self.frame_bot.pack(fill=tk.X, pady=6, side=tk.BOTTOM)
         self.rappel_touches = tk.Label(
             self.frame_bot,
-            text="F11 : Activer/Désactiver plein écran                 Entrée : Relancer le jeu               Echap : Revenir au menu principal",
+            text="F3/CTRL+T : Afficher les touches",
             font=("System", 15),
             bg="#010D19",
             fg="#A5A5B5",
         )
         self.rappel_touches.pack()
 
-        # place la grille au centre de la fenêtre et calcule la taille des cases
-
+        # Placement de la grille au centre de la fenêtre :
         self.racine.update_idletasks()  # permet de mettre à jour la fenêtre (on utilise pas juste update par ce que des fois ca bug pour aucune raison)
         self.racine.after(
             150
@@ -142,7 +141,7 @@ class LancerJeu:
 
     def echap(self, event):
         """
-        def: sur appui de la touche "échap", retourne au menu principal ou au menu libre
+        def: sur appui de la touche "échap", retourne au menu précédent
         in: None
         out: None
         """
@@ -169,31 +168,54 @@ class LancerJeu:
         in: None
         out: None
         """
-        if event.keysym == "F11":
+        if event.keysym == "F11" or event.keysym == "f":
             if self.is_fullscreen == True:
-                for lignes in range(self.nombre_case_y):
-                    for colonnes in range(self.nombre_case_x):
-                        self.cellule[lignes][colonnes].config(height="19", width="19")
-                        self.taille_case = 19
-
                 self.is_fullscreen = False
                 self.racine.attributes("-fullscreen", False)
-            else:
-                for lignes in range(self.nombre_case_y):
-                    for colonnes in range(self.nombre_case_x):
-                        self.cellule[lignes][colonnes].config(height="30", width="30")
-                        self.taille_case = 30
 
+            else:
                 self.racine.attributes("-fullscreen", True)
                 self.is_fullscreen = True
 
+            self.racine.update_idletasks()  # permet de mettre à jour la fenêtre (on utilise pas juste update par ce que des fois ca bug pour aucune raison)
+            self.racine.update()
+            # on calcule la taille des cases en fonction de la taille de la fenetre et du nombre de cases (en pratique le min est toujours sur la hauteur)
+            taille_case = self.calcul_taille_case()
+            for lignes in range(self.nombre_case_y):
+                for colonnes in range(self.nombre_case_x):
+                    self.cellule[lignes][colonnes].config(
+                        height=taille_case, width=taille_case
+                    )
+
+    def calcul_taille_case(self):
+        """
+        def: calcule la taille des cases pour le plein écran (la fonction à été crée pour éviter un probleme avec winfo)
+        in: None
+        out: taille_case : la taille des cases en pixels
+        """
+        self.racine.after(
+            50
+        )  # on ajoute un temps de pause pour etre sur que la taille de la fenetre est mise a jour sinon des fois ca bug
+        self.racine.update_idletasks()  # permet de mettre à jour la fenêtre (on utilise pas juste update par ce que des fois ca bug pour aucune raison)
+        self.racine.update()
+        taille_case = min(
+            (self.racine.winfo_width() - 50) / self.nombre_case_x,
+            (
+                self.racine.winfo_height()
+                - self.frame_top.winfo_height()
+                - self.frame_bot.winfo_height()
+                - 50
+            )
+            / self.nombre_case_y,
+        )
+        return taille_case
+
     def timer(self):
         """
-        def: actualise le timer toutes les secondes
+        def: lance le timer
         in: None
         out: None
         """
-
         self.start_time = time.time()
 
     def restart(self, event):
@@ -204,51 +226,38 @@ class LancerJeu:
         """
         # reset le timer
         self.start_time = time.time()
-
         if event.keysym == "Return":
             self.jeu(
-                self.plateau(self.nombre_case_x, self.nombre_case_y, "X"),
+                self.plateau(self.nombre_case_x, self.nombre_case_y),
                 self.nombre_vivant,
-                self.nombre_case_y,
             )
 
-    def plateau_GUI(self):
+    def affiche_touches(self, event):
         """
-        def: Crée le plateau de jeu du GUI sous la forme d'une grille de canva
-        in: None
-        out: None
+        def: sur appui de la touche "F3" ou "control+t", affiche les touches disponibles
+        in:
+        out:
         """
-        for i in range(self.nombre_case_y):
-            # crée une liste de canvas pour pouvoir modifier chaque case de la grille indépendamment
-            liste = []
-            for j in range(self.nombre_case_x):
-                canva = tk.Canvas(
-                    self.frame_grille,
-                    bg="black",
-                    bd=0,
-                    height=self.taille_case,
-                    width=self.taille_case,
-                    highlightthickness=0,
-                )
-                canva.grid(row=i, column=j)
-                liste.append(canva)
-            self.cellule.append(liste)
+        if event.keysym == "F2" or event.keysym == "t":
+            messagebox.showinfo(
+                "Touches",
+                "Touches disponibles dans cette fênetre : \n\nEchap : Quitter l'application \n Entrée : Relancer le jeu \n F11/CTRL+T : Activer/désactiver le plein écran",
+            )
 
-    def plateau(self, x, y, charactere):
+    def plateau(self, x, y):
         """
-        def: crée le plateau console sous la forme d'une liste 2D ou 'X' est une cellule morte et 'O' une cellule vivante
+        def: crée le plateau console sous la forme d'une liste 2D avec uniquement des cellules mortes 'X'
         in:
             x : le nombre de cellules sur x
             y : le nombre de cellules sur y
-            charactere : le charactere qui remplira la liste 2D
         out:
-            plateau : la liste 2D de taille {x}*{y} remplie de {charactere}
+            plateau : la liste 2D de taille {x}*{y}
         """
         plateau = []
         for i in range(y):
             lignes = []
             for j in range(x):
-                lignes.append(charactere)
+                lignes.append("X")
             plateau.append(lignes)
         return plateau
 
@@ -274,13 +283,34 @@ class LancerJeu:
                     cellule_vivante += 1
         return cellule_vivante
 
-    def jeu(self, grille, nbr_vivant, tour):
+    def plateau_GUI(self):
+        """
+        def: Crée le plateau de jeu du GUI sous la forme d'une grille de canva
+        in: None
+        out: None
+        """
+        for i in range(self.nombre_case_y):
+            # crée une liste de canvas pour pouvoir modifier chaque case de la grille indépendamment
+            liste = []
+            for j in range(self.nombre_case_x):
+                canva = tk.Canvas(
+                    self.frame_grille,
+                    bg="black",
+                    bd=0,
+                    height=self.taille_case,
+                    width=self.taille_case,
+                    highlightthickness=0,
+                )
+                canva.grid(row=i, column=j)
+                liste.append(canva)
+            self.cellule.append(liste)
+
+    def jeu(self, grille, nbr_vivant):
         """
         def: Lance le jeu
         in:
             grille : la grille de jeu
             nbr_vivant : le nombre initial de cellules vivantes
-            tour : le nombre maximum d'itérations de l'algorithme
         out: None
         """
         if self.mode == "Aleatoire":
@@ -363,7 +393,6 @@ class LancerJeu:
 
     def lancer_jeu(self):
         self.jeu(
-            self.plateau(self.nombre_case_x, self.nombre_case_y, "X"),
+            self.plateau(self.nombre_case_x, self.nombre_case_y),
             self.nombre_vivant,
-            self.nombre_case_y,
         )

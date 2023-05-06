@@ -117,6 +117,7 @@ class LancerJeu:
         self.rappel_touches.pack()
 
         # Placement de la grille au centre de la fenêtre :
+        self.racine.update()
         self.racine.update_idletasks()  # permet de mettre à jour la fenêtre (on utilise pas juste update par ce que des fois ca bug pour aucune raison)
         self.racine.after(
             150
@@ -179,6 +180,9 @@ class LancerJeu:
 
             self.racine.update_idletasks()  # permet de mettre à jour la fenêtre (on utilise pas juste update par ce que des fois ca bug pour aucune raison)
             self.racine.update()
+            self.racine.after(
+                50
+            )  # on ajoute un temps de pause pour etre sur que la taille de la fenetre est mise a jour sinon des fois ca bug
             # on calcule la taille des cases en fonction de la taille de la fenetre et du nombre de cases (en pratique le min est toujours sur la hauteur)
             taille_case = self.calcul_taille_case()
             for lignes in range(self.nombre_case_y):
@@ -241,7 +245,7 @@ class LancerJeu:
         if event.keysym == "F2" or event.keysym == "t":
             messagebox.showinfo(
                 "Touches",
-                "Touches disponibles dans cette fênetre : \n\nEchap : Quitter l'application \n Entrée : Relancer le jeu \n F11/CTRL+T : Activer/désactiver le plein écran",
+                "Touches disponibles dans cette fênetre : \n\nEchap : Quitter l'application \n Entrée : Relancer le jeu \n F11/CTRL+F : Activer/désactiver le plein écran",
             )
 
     def plateau(self, x, y):

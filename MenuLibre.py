@@ -129,6 +129,7 @@ class MenuLibre:
         self.rappel_touche.pack(side=tk.RIGHT, padx=10)
 
         # Affichage de la grille de jeu
+        self.racine.update()
         self.racine.update_idletasks()  # permet de mettre à jour la fenêtre (on utilise pas juste update par ce que des fois ca bug pour aucune raison)
         self.racine.after(
             150
@@ -169,7 +170,7 @@ class MenuLibre:
         in:
         out:
         """
-        if event.keysym == "F2" or event.keysym == "t":
+        if event.keysym == "F3" or event.keysym == "t":
             messagebox.showinfo(
                 "Touches",
                 "Touches disponibles dans le menu libre : \n\nEchap : Quitter l'application \n F1/ctrl+s : Sauvegarder la grille \n F2/ctrl+l : Charger une grille \n Entrée : Lancer le jeu \n Backspace : Effacer la grille",

@@ -6,6 +6,7 @@ from tkinter import messagebox
 import MenuLibre
 import LancerJeu
 from Affichage import Affichage
+import Combinaison
 
 
 class MenuPrincipal(Affichage):
@@ -16,7 +17,8 @@ class MenuPrincipal(Affichage):
         self.racine.iconphoto(True, icone)
 
         # Initialisation des variables
-        self.parametre = None
+        self.parametre_aleatoire = None
+        self.parametre_combinaison = None
         self.nbr_vivant = nbr_vivant
         self.nbr_cases = nbr_cases
 
@@ -127,6 +129,22 @@ class MenuPrincipal(Affichage):
         )  # Valeur d'actualisation du label en fontion de la taille de la fenetre
         self.actualisation_widgets.append((self.aleatoire, self.taille_aleatoire))
 
+        # Bouton pour accéder au mode combinaison
+        self.combinaison = tk.Button(
+            self.racine,
+            text="Combinaison",
+            bg="#010D19",
+            fg="#A5A5B5",
+            font=("System", int(float((self.width + self.height) / 50))),
+            command=self.mode_combinaison,
+        )
+        self.combinaison.pack(ipady=6, expand=True)
+        self.taille_combinaison = lambda: (
+            "System",
+            int(float((self.width + self.height) / 50)),
+        )  # Valeur d'actualisation du label en fontion de la taille de la fenetre
+        self.actualisation_widgets.append((self.combinaison, self.taille_combinaison))
+
     def echap(self, event):
         """
         def: sur appui de la touche "échap", quitte la fenêtre et arrête le programme
@@ -166,16 +184,16 @@ class MenuPrincipal(Affichage):
         out: None
         """
         # contrôle si la fenêtre paramètre existe déjà
-        if self.parametre != None:
-            self.parametre.destroy()
+        if self.parametre_aleatoire != None:
+            self.parametre_aleatoire.destroy()
         # Création de la fenêtre paramètre
-        self.parametre = tk.Toplevel(self.racine, bg="#141418")
-        self.parametre.resizable(False, False)
-        self.parametre.title("Paramètres")
+        self.parametre_aleatoire = tk.Toplevel(self.racine, bg="#141418")
+        self.parametre_aleatoire.resizable(False, False)
+        self.parametre_aleatoire.title("Paramètres")
 
         # affichage du curseur pour choisir le nombre de cases de la grille de jeu
         self.curseur_nbr_cases = tk.Scale(
-            self.parametre,
+            self.parametre_aleatoire,
             orient="horizontal",
             from_=10,
             to=100,
@@ -196,7 +214,7 @@ class MenuPrincipal(Affichage):
 
         # affichage du curseur pour choisir le nombre de cellules vivantes initiales
         self.curseur_nbr_vivant = tk.Scale(
-            self.parametre,
+            self.parametre_aleatoire,
             orient="horizontal",
             from_=0,
             to=self.curseur_nbr_cases.get()
@@ -223,12 +241,57 @@ class MenuPrincipal(Affichage):
 
         # Bouton valider pour enregistrer les paramètres et lancer le mode aléatoire
         self.valider = tk.Button(
-            self.parametre,
+            self.parametre_aleatoire,
             text="Valider",
             bg="#010D19",
             fg="#A5A5B5",
             font=("System", 15),
-            command=self.enregistre_parametre,
+            command=self.enregistre_parametre_aleatoire,
+        )
+        self.valider.pack(ipady=6, expand=True)
+
+    def mode_combinaison(self):
+        """
+        def: sur appui du bouton "mode combinaison", détruit la fenêtre principale et affiche la fenêtre paramètre
+        in: None
+        out: None
+        """
+        # contrôle si la fenêtre paramètre existe déjà
+        if self.parametre_combinaison != None:
+            self.parametre_combinaison.destroy()
+        # Création de la fenêtre paramètre
+        self.parametre_combinaison = tk.Toplevel(self.racine, bg="#141418")
+        self.parametre_combinaison.resizable(False, False)
+        self.parametre_combinaison.title("Paramètres")
+
+        # affichage du curseur pour choisir le nombre de cases de la grille de jeu (3, 4, 5 ou 6)
+        self.curseur_nbr_cases = tk.Scale(
+            self.parametre_combinaison,
+            orient="horizontal",
+            from_=3,
+            to=5,
+            resolution=1,
+            tickinterval=1,
+            length=350,
+            label="Nombre de cases",
+            bg="#141418",
+            fg="#A5A5B5",
+            font="System",
+            highlightbackground="#141418",
+            troughcolor="#A5A5B5",
+            activebackground="#A5A5B5",
+        )
+        self.curseur_nbr_cases.pack(ipady=6, expand=True)
+        self.curseur_nbr_cases.set(4)
+
+        # Bouton valider pour enregistrer les paramètres et lancer le mode aléatoire
+        self.valider = tk.Button(
+            self.parametre_combinaison,
+            text="Valider",
+            bg="#010D19",
+            fg="#A5A5B5",
+            font=("System", 15),
+            command=self.enregistre_parametre_combinaison,
         )
         self.valider.pack(ipady=6, expand=True)
 
@@ -253,7 +316,7 @@ class MenuPrincipal(Affichage):
             )
         )
 
-    def enregistre_parametre(self):
+    def enregistre_parametre_aleatoire(self):
         """
         def: sur appui du bouton "valider", enregistre les paramètres et détruit la fenêtre paramètre et la fenetre principale pour lancer le mode aléatoire
         in: None
@@ -262,13 +325,28 @@ class MenuPrincipal(Affichage):
         # Enregistrement des paramètres
         self.nbr_vivant = self.curseur_nbr_vivant.get()
         self.nbr_cases = self.curseur_nbr_cases.get()
-        self.parametre.destroy()
+        self.parametre_aleatoire.destroy()
 
         # Destruction de la fenêtre principale pour accéder au mode aléatoire
         self.racine.destroy()
         aleatoire = LancerJeu.LancerJeu(
             self.nbr_vivant, self.nbr_cases, "Aleatoire", {}
         )
+        aleatoire.racine.mainloop()
+
+    def enregistre_parametre_combinaison(self):
+        """
+        def: sur appui du bouton "valider", enregistre les paramètres et détruit la fenêtre paramètre et la fenetre principale pour lancer le mode combinaison
+        in: None
+        out: None
+        """
+        # Enregistrement des paramètres
+        self.nbr_cases = self.curseur_nbr_cases.get()
+        self.parametre_combinaison.destroy()
+
+        # Destruction de la fenêtre principale pour accéder au mode aléatoire
+        self.racine.destroy()
+        aleatoire = Combinaison.Combinaison(self.nbr_cases)
         aleatoire.racine.mainloop()
 
 

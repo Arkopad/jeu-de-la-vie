@@ -245,7 +245,7 @@ class LancerJeu:
         if event.keysym == "F2" or event.keysym == "t":
             messagebox.showinfo(
                 "Touches",
-                "Touches disponibles dans cette fênetre : \n\nEchap : Quitter l'application \n Entrée : Relancer le jeu \n F11/CTRL+F : Activer/désactiver le plein écran",
+                " Echap : Revenir au menu précédent \n\n Entrée : Relancer le jeu \n\n F11/CTRL+F : Activer/désactiver le plein écran",
             )
 
     def plateau(self, x, y):

@@ -1,3 +1,9 @@
+"""
+=======================================================================================================================
+===================================================FICHIER PRINCIPAL===================================================
+=======================================================================================================================
+"""
+
 # Importation des librairies
 import tkinter as tk
 from tkinter import messagebox
@@ -12,7 +18,7 @@ import Combinaison
 class MenuPrincipal(Affichage):
     def __init__(self, nbr_vivant, nbr_cases):
         # Création de la fenêtre principale avec la classe Affichage
-        super().__init__(nom=f"Menu_principal", geometry=(1280, 720), nb_cellues=0)
+        super().__init__(nom=f"Menu Principal", geometry=(1280, 720), nb_cellues=0)
         icone = tk.PhotoImage(file="icon.png")
         self.racine.iconphoto(True, icone)
 
@@ -21,6 +27,7 @@ class MenuPrincipal(Affichage):
         self.parametre_combinaison = None
         self.nbr_vivant = nbr_vivant
         self.nbr_cases = nbr_cases
+        self.liste_police = ("System", "")
 
         # Affectation des touches
         self.racine.bind_all("<Key-Escape>", self.echap)
@@ -33,8 +40,6 @@ class MenuPrincipal(Affichage):
     def creer_widgets(self):
         """
         def: crée et affiche les widgets sur la fenêtre principale
-        in: None
-        out: None
         """
 
         # Frame du titre du jeu en haut de l'écran
@@ -52,19 +57,19 @@ class MenuPrincipal(Affichage):
         self.frame_actualisation.append((self.frame_top, self.fram_top_borderwidth))
 
         # Label du titre du jeu
-        self.generation = tk.Label(
+        self.titre = tk.Label(
             self.frame_top,
             text="JEU DE LA VIE",
-            font=("System", int(float((self.width + self.height) / 50))),
+            font=("system", int(float((self.width + self.height) / 50))),
             bg="#010D19",
             fg="#A5A5B5",
         )
-        self.generation.pack(pady=4)
-        self.police_generation = lambda: (
-            "System",
+        self.titre.pack(pady=4)
+        self.police_titre = lambda: (
+            "system",
             int(float((self.width + self.height) / 50)),
         )  # Valeur d'actualisation du label en fontion de la taille de la fenetre
-        self.actualisation_widgets.append((self.generation, self.police_generation))
+        self.actualisation_widgets.append((self.titre, self.police_titre))
 
         # Bannière rappel des touches en bas de l'écran
         self.frame_bot = tk.Frame(
@@ -148,29 +153,23 @@ class MenuPrincipal(Affichage):
     def echap(self, event):
         """
         def: sur appui de la touche "échap", quitte la fenêtre et arrête le programme
-        in: None
-        out: None
         """
         if event.keysym == "Escape":
             self.racine.destroy()
 
     def affiche_touches(self, event):
         """
-        def: sur appui de la touche "F3" ou "control+t", affiche les touches disponibles dans un messagebox
-        in: None
-        out: None
+        def: sur appui de la touche "F3" ou "CTRL+T", affiche les touches disponibles dans un messagebox
         """
-        if event.keysym == "F2" or event.keysym == "t":
+        if event.keysym == "F3" or event.keysym == "t":
             messagebox.showinfo(
                 "Touches",
-                "Touches disponibles dans le menu principal : \n\nEchap : Quitter l'application",
+                "Echap : Quitter l'application",
             )
 
     def mode_libre(self):
         """
         def: sur appui du bouton "mode libre", détruit la fenêtre principale et lance le mode libre
-        in: None
-        out: None
         """
         # Destruction de la fenêtre principale pour accéder au mode libre
         self.racine.destroy()
@@ -180,8 +179,6 @@ class MenuPrincipal(Affichage):
     def mode_aleatoire(self):
         """
         def: sur appui du bouton "mode aléatoire", détruit la fenêtre principale et affiche la fenêtre paramètre
-        in: None
-        out: None
         """
         # contrôle si la fenêtre paramètre existe déjà
         if self.parametre_aleatoire != None:
@@ -253,8 +250,6 @@ class MenuPrincipal(Affichage):
     def mode_combinaison(self):
         """
         def: sur appui du bouton "mode combinaison", détruit la fenêtre principale et affiche la fenêtre paramètre
-        in: None
-        out: None
         """
         # contrôle si la fenêtre paramètre existe déjà
         if self.parametre_combinaison != None:
@@ -298,8 +293,6 @@ class MenuPrincipal(Affichage):
     def maj_nbr_vivant(self, event):
         """
         def: quand on relache le curseur du nombre de cases, met à jour le curseur du nombre de cellules vivantes
-        in: None
-        out: None
         """
         self.curseur_nbr_vivant.config(
             to=self.curseur_nbr_cases.get()
@@ -319,8 +312,6 @@ class MenuPrincipal(Affichage):
     def enregistre_parametre_aleatoire(self):
         """
         def: sur appui du bouton "valider", enregistre les paramètres et détruit la fenêtre paramètre et la fenetre principale pour lancer le mode aléatoire
-        in: None
-        out: None
         """
         # Enregistrement des paramètres
         self.nbr_vivant = self.curseur_nbr_vivant.get()
@@ -337,8 +328,6 @@ class MenuPrincipal(Affichage):
     def enregistre_parametre_combinaison(self):
         """
         def: sur appui du bouton "valider", enregistre les paramètres et détruit la fenêtre paramètre et la fenetre principale pour lancer le mode combinaison
-        in: None
-        out: None
         """
         # Enregistrement des paramètres
         self.nbr_cases = self.curseur_nbr_cases.get()

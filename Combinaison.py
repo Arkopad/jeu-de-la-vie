@@ -28,32 +28,30 @@ def jeu_de_la_vie(nb_lignes, nb_colonnes, grille):
         [[0 for j in range(nb_colonnes)] for i in range(nb_lignes)]
     )
     # Parcourir chaque cellule de la grille
-    for i in range(nb_lignes):
-        for j in range(nb_colonnes):
+    for ligne in range(nb_lignes):
+        for colonne in range(nb_colonnes):
             # Calculer le nombre de voisins vivants
             nb_voisins = 0
-            for k in range(max(i - 1, 0), min(i + 2, nb_lignes)):
-                for l in range(max(j - 1, 0), min(j + 2, nb_colonnes)):
+            for k in range(ligne - 1, ligne + 2):
+                for l in range(colonne - 1, colonne + 2):
                     if (
                         k >= 0
                         and k < nb_lignes
                         and l >= 0
                         and l < nb_colonnes
-                        and (k != i or l != j)
+                        and (k != ligne or l != colonne)
                     ):
                         nb_voisins += grille[k][l]
+
             # Appliquer les règles du jeu de la vie
-            if grille[i][j] == 1:
-                if nb_voisins < 2 or nb_voisins > 3:
-                    grille_suivante[i][j] = 0
+            if grille[ligne][colonne] == 1:
+                if nb_voisins == 3 or nb_voisins == 2:
+                    grille_suivante[ligne][colonne] = 1
                 else:
-                    grille_suivante[i][j] = 1
+                    grille_suivante[ligne][colonne] = 0
             else:
                 if nb_voisins == 3:
-                    grille_suivante[i][j] = 1
-                else:
-                    grille_suivante[i][j] = 0
-
+                    grille_suivante[ligne][colonne] = 1
     return grille_suivante
 
 
@@ -108,6 +106,7 @@ class Combinaison(Affichage):
         self.ligne = nbr_cases
         self.nb_cellues = self.colonne * self.ligne
         self.numero_combinaison = 0
+        self.calcul_fait = False
 
         # Initialisation de la fenetre
         super().__init__(
@@ -179,108 +178,52 @@ class Combinaison(Affichage):
                     highlightbackground="#A5A5B5",
                 )
                 canvas.grid(row=i, column=j, sticky="nsew")
-                canvas.bind("<Button-1>", self.change_couleur)
                 self.canvases[i][j] = canvas
 
         # Création d'un cadre pour les boutons
         self.buttons_frame = tk.Frame(self.racine)
         self.buttons_frame.pack(side="bottom")
 
-        self.police_calcul = lambda: (
-            "Comic sans Ms",
-            int(float((self.width + self.height) / 2) / 40),
-            "bold",
-        )  # Valeur d'actualisation du label du bouton en fonction de la taille de la fenetre
-        self.bouton_calcul = tk.Button(
-            master=self.buttons_frame,
-            text="Calculer",
-            font=self.police_calcul(),
-            background="#141418",
-            foreground="white",
-            command=self.calcul_combinaison,
-        )
-        self.bouton_calcul.pack(side="left", fill="x")
-
         self.police_affichage = lambda: (
-            "Comic sans Ms",
-            int(float((self.width + self.height) / 2) / 40),
+            "System",
+            int(float((self.width + self.height) / 2) / 30),
             "bold",
         )  # Valeur d'actualisation du label du bouton en fonction de la taille de la fenetre
         self.bouton_afficage = tk.Button(
             master=self.buttons_frame,
             text="Afficher",
-            font=self.police_calcul(),
-            background="#141418",
-            foreground="white",
+            font=self.police_affichage(),
+            background="#010D19",
+            foreground="#A5A5B5",
             command=self.affichage_combinaison,
         )
         self.bouton_afficage.pack(side="left", fill="x")
 
         self.police_fast = lambda: (
-            "Comic sans Ms",
-            int(float((self.width + self.height) / 2) / 40),
+            "System",
+            int(float((self.width + self.height) / 2) / 30),
             "bold",
         )  # Valeur d'actualisation du label du bouton en fonction de la taille de la fenetre
-        self.fast = tk.Button(
+        self.calcul_combinaison = tk.Button(
             master=self.buttons_frame,
-            text="FASTER",
+            text="Calculer",
             font=self.police_fast(),
-            background="#ab3fff",
-            foreground="white",
-            command=self.fast,
+            background="#010D19",
+            foreground="#A5A5B5",
+            command=self.calcul_combinaison,
         )
-        self.fast.pack(side="left", fill="x")
+        self.calcul_combinaison.pack(side="left", fill="x")
 
-        self.actualisation(self.bouton_calcul, self.police_calcul)
         self.actualisation(self.bouton_afficage, self.police_affichage)
-        self.actualisation(self.fast, self.police_fast)
-
-    def change_couleur(self, event):
-        """
-        Fonction permettant de changer la couleur du canvas sur lequel on a cliqué
-        in: event
-        out: None
-        """
-        canvas = event.widget
-        if canvas.cget("background") == "black":
-            canvas.config(background="white")
-        else:
-            canvas.config(background="black")
+        self.actualisation(self.calcul_combinaison, self.police_fast)
 
     def calcul_combinaison(self):
-        # Initialisation de variables utiles:
-        total = 2**self.nb_cellues
-
-        # Nombre de combinaisons stables
-        self.nb_combinaisons_stables = 0
-
-        # Initialisation de la liste des combinaisons
-        self.combinaisons = []
-
-        # Calcul de toutes les combinaisons
-        combinaison_actuelle = np.zeros((self.ligne, self.colonne), dtype=np.int64)
-        for bin in tqdm(range(total)):
-            # Calcul de la combinaison
-            for i in range(self.ligne):
-                for j in range(self.colonne):
-                    combinaison_actuelle[i, j] = (bin >> (i * self.ligne + j)) & 1
-
-            # Calcul de la grille suivante
-            grille_suivante = jeu_de_la_vie(
-                self.ligne, self.colonne, combinaison_actuelle
-            )
-
-            # Vérification de la stabilité de la combinaison
-            if np.array_equal(grille_suivante, combinaison_actuelle):
-                self.nb_combinaisons_stables += 1
-                self.combinaisons.append(grille_suivante)
-
-    def fast(self):
         """
         Fonction permettant de calculer toutes les combinaisons possibles d'une grille avec le jeu de la vie en force brute
         in: event
         out: None
         """
+        self.calcul_fait = True
         start_time = time.time()
         self.combinaisons, self.nb_combinaisons_stables = combinaison_numba(
             self.ligne, self.colonne, self.nb_cellues
@@ -301,16 +244,21 @@ class Combinaison(Affichage):
         in: None
         out: None
         """
-        for i in range(self.nb_combinaisons_stables):
-            for j in range(len(self.combinaisons[i])):
-                for k in range(len(self.combinaisons[i][j])):
-                    if self.combinaisons[i][j][k] == 1:
-                        self.canvases[j][k].config(background="white")
-                    else:
-                        self.canvases[j][k].config(background="black")
-            self.racine.update()
-            self.racine.after(50)
-            self.racine.update()
+        if self.calcul_fait == True:
+            for i in range(self.nb_combinaisons_stables):
+                for j in range(len(self.combinaisons[i])):
+                    for k in range(len(self.combinaisons[i][j])):
+                        if self.combinaisons[i][j][k] == 1:
+                            self.canvases[j][k].config(background="white")
+                        else:
+                            self.canvases[j][k].config(background="black")
+                self.racine.update()
+                self.racine.after(50)
+                self.racine.update()
+        else:
+            messagebox.showerror(
+                "Erreur", 'Veuillez d\'abord appuyer sur le bouton "Calculer".'
+            )
 
     def defilement_droit(self, event):
         """

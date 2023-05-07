@@ -82,7 +82,7 @@ class MenuLibre:
         self.nom = tk.Label(
             self.frame_top,
             text=self.nom_fichier,
-            font=("System", 25),
+            font=("System", 30),
             bg="#010D19",
             fg="#A5A5B5",
         )
@@ -92,7 +92,7 @@ class MenuLibre:
         self.text_taille = tk.Label(
             self.frame_top,
             text=f"{self.nombre_case_x}x{self.nombre_case_y}",
-            font=("System", 25),
+            font=("System", 30),
             bg="#010D19",
             fg="#A5A5B5",
         )
@@ -116,17 +116,7 @@ class MenuLibre:
             bg="#010D19",
             fg="#A5A5B5",
         )
-        self.rappel_touches.pack(side=tk.LEFT, padx=10)
-
-        # Affichage du rappel de la touche pour changer la taille de la grille
-        self.rappel_touche = tk.Label(
-            self.frame_bot,
-            text="F4/CTRL+G : Changer la taille de la grille",
-            font=("System", 15),
-            bg="#010D19",
-            fg="#A5A5B5",
-        )
-        self.rappel_touche.pack(side=tk.RIGHT, padx=10)
+        self.rappel_touches.pack(padx=10)
 
         # Affichage de la grille de jeu
         self.racine.update()
@@ -173,7 +163,7 @@ class MenuLibre:
         if event.keysym == "F3" or event.keysym == "t":
             messagebox.showinfo(
                 "Touches",
-                "Touches disponibles dans le menu libre : \n\nEchap : Quitter l'application \n F1/ctrl+s : Sauvegarder la grille \n F2/ctrl+l : Charger une grille \n Entrée : Lancer le jeu \n Backspace : Effacer la grille",
+                " Echap : Revenir au menu principal \n\n F4/CTRL+G : Changer la taille de la grille \n\n F1/CTRL+S : Sauvegarder la grille \n\n F2/CTRL+L : Charger une grille \n\n Entrée : Lancer le jeu \n\n Backspace : Effacer la grille",
             )
 
     def changer_taille_grille(self, event):

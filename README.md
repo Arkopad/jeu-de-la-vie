@@ -1,84 +1,35 @@
-<!-- README -->
+## README
 
-## A propos du projet 
+### Prérequis
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+Les librairies suivantes sont nécéssaires pour lancer le programme :
 
-Here you can describe the project, why you made it and **for who you made it**, but mostly don't forget to add a screenshot like the image above AND a link to the demo like this : https://NicolasBrondin.github.io/basic-readme-template/
-
-### Built With
-
-- 🖊️ Markdown
-- 🐙 Github
-- 💻 VS Code
-
-<!-- GETTING STARTED -->
-
-## Getting Started
-
-To get a local copy up and running follow these simple steps.
-
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-
-- Git
+- tkinter
 
 ```sh
-sudo apt-get install git
+pip3 install tkinter
 ```
 
-### Installation
-
-1. Clone the repo
+- numpy
 
 ```sh
-git clone https://github.com/NicolasBrondin/basic-readme-template
+pip3 install numpy
 ```
 
-2. Open VS Code
-3. Install Markdown Preview Enhancement plugin
-4. Open the README.md file and execute the following command
+- tqdm
 
 ```sh
-ctrl+k v
+pip3 install tqdm
 ```
 
-<!-- USAGE EXAMPLES -->
+- numba
 
-## Usage
+```sh
+pip3 install numba
+```
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+### Lancement 
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+1. Télécharger le dossier 
+2. Executer le fichier 'MenuPrincpal.py'
 
-<!-- CONTACT -->
-
-## Contact
-
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email
-
-Project Link: [https://github.com/github_username/github_repo](https://github.com/github_username/github_repo)
-
-<!-- ACKNOWLEDGEMENTS -->
-
-## Acknowledgements
-
-- This readme version is a simplified version of this [github repository](https://github.com/othneildrew/Best-README-Template) by Othneildrew
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-
-[contributors-shield]: https://img.shields.io/github/contributors/NicolasBrondin/basic-readme-template.svg?style=flat-square
-[contributors-url]: https://github.com/NicolasBrondin/basic-readme-template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/NicolasBrondin/basic-readme-template.svg?style=flat-square
-[forks-url]: https://github.com/NicolasBrondin/basic-readme-template/network/members
-[stars-shield]: https://img.shields.io/github/stars/NicolasBrondin/basic-readme-template.svg?style=flat-square
-[stars-url]: https://github.com/NicolasBrondin/basic-readme-template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/NicolasBrondin/basic-readme-template.svg?style=flat-square
-[issues-url]: https://github.com/NicolasBrondin/basic-readme-template/issues
-[license-shield]: https://img.shields.io/github/license/NicolasBrondin/basic-readme-template.svg?style=flat-square
-[license-url]: https://github.com/NicolasBrondin/basic-readme-template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: docs/cover.jpg

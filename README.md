@@ -33,3 +33,4 @@ pip3 install numba
 1. Télécharger le dossier 
 2. Executer le fichier 'MenuPrincpal.py'
 
+![Jeu de la vie](https://cdn-icons-png.flaticon.com/512/4071/4071999.png "Jeu de la vie")

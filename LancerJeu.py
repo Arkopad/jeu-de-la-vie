@@ -277,8 +277,10 @@ class LancerJeu:
         """
         cellule_vivante = 0
         cellule_morte = 0
+        # on parcourt les 8 cellules autour de la cellule étudiée en excluant les cellules en dehors de la grille
         for i in range(max(ligne - 1, 0), min(ligne + 2, len(grille))):
             for j in range(max(colonne - 1, 0), min(colonne + 2, len(grille[0]))):
+                # on ne compte pas la cellule étudiée
                 if i == ligne and j == colonne:
                     continue
                 if grille[i][j] == "X":
@@ -342,11 +344,14 @@ class LancerJeu:
                     if liste[ligne][colonne] == "O":
                         grille[ligne][colonne] = "O"
                         self.cellule[ligne][colonne].config(bg="white")
+        # on met à jour la fenêtre
+        self.racine.update()
 
         # lance le jeu de la vie
         for i in range(100000):
             vivant = 0
 
+            # timer
             elapsed_time = int(time.time() - self.start_time) + self.seconde
             minutes, seconds = divmod(elapsed_time, 60)
             hours, minutes = divmod(minutes, 60)

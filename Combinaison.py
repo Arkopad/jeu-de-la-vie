@@ -8,6 +8,13 @@ from tqdm import tqdm
 from numba import njit, prange
 
 
+"""
+=======================================================================================================================
+====================================================FONCTIONS NUMBA====================================================
+=======================================================================================================================
+"""
+
+
 @njit()
 def jeu_de_la_vie(nb_lignes, nb_colonnes, grille):
     """
@@ -25,8 +32,8 @@ def jeu_de_la_vie(nb_lignes, nb_colonnes, grille):
         for j in range(nb_colonnes):
             # Calculer le nombre de voisins vivants
             nb_voisins = 0
-            for k in range(i - 1, i + 2):
-                for l in range(j - 1, j + 2):
+            for k in range(max(i - 1, 0), min(i + 2, nb_lignes)):
+                for l in range(max(j - 1, 0), min(j + 2, nb_colonnes)):
                     if (
                         k >= 0
                         and k < nb_lignes
@@ -100,14 +107,17 @@ class Combinaison(Affichage):
         self.colonne = nbr_cases
         self.ligne = nbr_cases
         self.nb_cellues = self.colonne * self.ligne
+        self.numero_combinaison = 0
 
         # Initialisation de la fenetre
         super().__init__(
             nom=f"Combinaison {self.ligne}x{self.colonne}",
-            geometry=(500, 500),
+            geometry=(600, 600),
             nb_cellues=self.nb_cellues,
             dimensions=(self.ligne, self.colonne),
         )
+        icone = tk.PhotoImage(file="icon.png")
+        self.racine.iconphoto(True, icone)
         self.width = self.racine.winfo_width()
         self.height = self.racine.winfo_height()
 
@@ -123,9 +133,38 @@ class Combinaison(Affichage):
         out: None
         """
 
+        # Frame du titre du jeu en haut de l'écran
+        self.frame_top = tk.Frame(
+            self.racine,
+            borderwidth=int(float(self.width + self.height) / 1000),
+            bg="#010D19",
+            highlightthickness=5,
+            highlightbackground="black",
+        )
+        self.frame_top.pack(fill=tk.X, pady=6)
+        self.fram_top_borderwidth = lambda: int(
+            float(self.width + self.height) / 1000
+        )  # Valeur d'actualisation de la bordure en fonction de la taille de la fenetre
+        self.frame_actualisation.append((self.frame_top, self.fram_top_borderwidth))
+
+        # Label du titre du jeu
+        self.titre = tk.Label(
+            self.frame_top,
+            text=f"Combinaison {self.ligne}x{self.colonne}",
+            font=("System", int(float((self.width + self.height) / 50))),
+            bg="#010D19",
+            fg="#A5A5B5",
+        )
+        self.titre.pack(pady=4)
+        self.police_generation = lambda: (
+            "System",
+            int(float((self.width + self.height) / 50)),
+        )  # Valeur d'actualisation du label en fontion de la taille de la fenetre
+        self.actualisation_widgets.append((self.titre, self.police_generation))
+
         # Définition de la grille
-        self.frame = tk.Frame(self.racine)
-        self.frame.place(relx=0.5, rely=0.5, anchor="center")
+        self.frame = tk.Frame(self.racine, bd=2, bg="#A5A5B5")
+        self.frame.place(relx=0.5, rely=0.515, anchor="center")
         for i in range(self.ligne):
             self.frame.grid_rowconfigure(i, weight=1)
             for j in range(self.colonne):
@@ -134,27 +173,14 @@ class Combinaison(Affichage):
                     self.frame,
                     width=self.taille_cellule,
                     height=self.taille_cellule,
-                    background="#141418",
-                    bd=1,
-                    relief="solid",
+                    bg="black",
+                    bd=2,
+                    highlightthickness=2,
+                    highlightbackground="#A5A5B5",
                 )
                 canvas.grid(row=i, column=j, sticky="nsew")
                 canvas.bind("<Button-1>", self.change_couleur)
                 self.canvases[i][j] = canvas
-
-        self.police_titre = lambda: (
-            "Comic sans Ms",
-            int(float((self.width + self.height) / 2) / 20),
-            "bold",
-        )  # Valeur d'actualisation du label en fonction de la taille de la fenetre
-        self.titre = tk.Label(
-            self.racine,
-            text=f"Combinaison {self.ligne}x{self.colonne}",
-            font=self.police_titre(),
-            background="#141418",
-            foreground="white",
-        )
-        self.titre.pack(anchor="n", fill="x")
 
         # Création d'un cadre pour les boutons
         self.buttons_frame = tk.Frame(self.racine)
@@ -205,25 +231,8 @@ class Combinaison(Affichage):
         )
         self.fast.pack(side="left", fill="x")
 
-        self.police_quitter = lambda: (
-            "Comic sans Ms",
-            int(float((self.width + self.height) / 2) / 40),
-            "bold",
-        )  # Valeur d'actualisation du label du bouton en fonction de la taille de la fenetre
-        self.quitter = tk.Button(
-            master=self.buttons_frame,
-            text="Quitter",
-            font=self.police_quitter(),
-            background="#9E1C00",
-            foreground="white",
-            command=self.exit,
-        )
-        self.quitter.pack(side="left", fill="x")
-
-        self.actualisation(self.titre, self.police_titre)
         self.actualisation(self.bouton_calcul, self.police_calcul)
         self.actualisation(self.bouton_afficage, self.police_affichage)
-        self.actualisation(self.quitter, self.police_quitter)
         self.actualisation(self.fast, self.police_fast)
 
     def change_couleur(self, event):
@@ -233,10 +242,10 @@ class Combinaison(Affichage):
         out: None
         """
         canvas = event.widget
-        if canvas.cget("background") == "#141418":
+        if canvas.cget("background") == "black":
             canvas.config(background="white")
         else:
-            canvas.config(background="#141418")
+            canvas.config(background="black")
 
     def calcul_combinaison(self):
         # Initialisation de variables utiles:
@@ -282,6 +291,10 @@ class Combinaison(Affichage):
             f"Nombre de combinaisons stables: {self.nb_combinaisons_stables-1}",
         )
 
+        # permet de faire défiler les combinaisons avec touches gauches et droite
+        self.racine.bind_all("<Right>", self.defilement_droit)
+        self.racine.bind_all("<Left>", self.defilement_gauche)
+
     def affichage_combinaison(self):
         """
         Fonction permettant d'afficher toutes les combinaisons
@@ -294,18 +307,44 @@ class Combinaison(Affichage):
                     if self.combinaisons[i][j][k] == 1:
                         self.canvases[j][k].config(background="white")
                     else:
-                        self.canvases[j][k].config(background="#141418")
+                        self.canvases[j][k].config(background="black")
             self.racine.update()
-            self.racine.after(500)
+            self.racine.after(50)
             self.racine.update()
 
-    def exit(self):
+    def defilement_droit(self, event):
         """
-        Fonction permettant de quitter le programme
-        in: None
-        out: None
+        Fonction permettant de faire défiler les combinaisons avec la touche droite
         """
-        self.racine.destroy()
+        # on utilise le modulo pour éviter de dépasser le nombre de combinaisons
+        self.numero_combinaison = (
+            self.numero_combinaison + 1
+        ) % self.nb_combinaisons_stables
+
+        for j in range(len(self.combinaisons[self.numero_combinaison])):
+            for k in range(len(self.combinaisons[self.numero_combinaison][j])):
+                if self.combinaisons[self.numero_combinaison][j][k] == 1:
+                    self.canvases[j][k].config(background="white")
+                else:
+                    self.canvases[j][k].config(background="black")
+        self.racine.update()
+
+    def defilement_gauche(self, event):
+        """
+        Fonction permettant de faire défiler les combinaisons avec la touche gauche
+        """
+        # on utilise le modulo pour éviter de dépasser le nombre de combinaisons
+        self.numero_combinaison = (
+            self.numero_combinaison - 1
+        ) % self.nb_combinaisons_stables
+
+        for j in range(len(self.combinaisons[self.numero_combinaison])):
+            for k in range(len(self.combinaisons[self.numero_combinaison][j])):
+                if self.combinaisons[self.numero_combinaison][j][k] == 1:
+                    self.canvases[j][k].config(background="white")
+                else:
+                    self.canvases[j][k].config(background="black")
+        self.racine.update()
 
     def echap(self, event):
         """

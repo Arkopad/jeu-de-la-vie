@@ -12,7 +12,8 @@ from tkinter import messagebox
 import MenuLibre
 import LancerJeu
 from Affichage import Affichage
-import Combinaison
+import CombinaisonSansBords
+import CombinaisonAvecBords
 
 
 class MenuPrincipal(Affichage):
@@ -28,6 +29,7 @@ class MenuPrincipal(Affichage):
         self.nbr_vivant = nbr_vivant
         self.nbr_cases = nbr_cases
         self.liste_police = ("System", "")
+        self.bords = tk.IntVar()
 
         # Affectation des touches
         self.racine.bind_all("<Key-Escape>", self.echap)
@@ -254,12 +256,13 @@ class MenuPrincipal(Affichage):
         # contrôle si la fenêtre paramètre existe déjà
         if self.parametre_combinaison != None:
             self.parametre_combinaison.destroy()
+
         # Création de la fenêtre paramètre
         self.parametre_combinaison = tk.Toplevel(self.racine, bg="#141418")
         self.parametre_combinaison.resizable(False, False)
         self.parametre_combinaison.title("Paramètres")
 
-        # affichage du curseur pour choisir le nombre de cases de la grille de jeu (3, 4, 5 ou 6)
+        # affichage du curseur pour choisir le nombre de cases de la grille de jeu (3, 4 ou 5)
         self.curseur_nbr_cases = tk.Scale(
             self.parametre_combinaison,
             orient="horizontal",
@@ -278,6 +281,19 @@ class MenuPrincipal(Affichage):
         )
         self.curseur_nbr_cases.pack(ipady=6, expand=True)
         self.curseur_nbr_cases.set(4)
+
+        # check pour choisir combinaison avec bords ou sans bords
+        self.check_bords = tk.Checkbutton(
+            self.parametre_combinaison,
+            text="Combinaison avec bords ?",
+            bg="#141418",
+            fg="#A5A5B5",
+            font="System",
+            highlightbackground="#141418",
+            var= self.bords,
+        )
+        self.check_bords.pack(ipady=6, expand=True)
+
 
         # Bouton valider pour enregistrer les paramètres et lancer le mode aléatoire
         self.valider = tk.Button(
@@ -335,8 +351,12 @@ class MenuPrincipal(Affichage):
 
         # Destruction de la fenêtre principale pour accéder au mode aléatoire
         self.racine.destroy()
-        aleatoire = Combinaison.Combinaison(self.nbr_cases)
-        aleatoire.racine.mainloop()
+        if self.bords.get() == True:
+            aleatoire = CombinaisonAvecBords.CombinaisonAvecBords(self.nbr_cases)
+            aleatoire.racine.mainloop()
+        else:
+            aleatoire = CombinaisonSansBords.CombinaisonSansBords(self.nbr_cases)
+            aleatoire.racine.mainloop()
 
 
 if __name__ == "__main__":

@@ -7,14 +7,13 @@ from tkinter import messagebox
 from tqdm import tqdm
 from numba import njit, prange
 
-#-----------COMBINAISON SANS LES BORDS : ON NE PRENDS PAS EN COMPTE LES CELLULES EN DEHORS DE LA GRILLE---------------#
+# -----------COMBINAISON SANS LES BORDS : ON NE PRENDS PAS EN COMPTE LES CELLULES EN DEHORS DE LA GRILLE---------------#
 
 """
 =======================================================================================================================
 ====================================================FONCTIONS NUMBA====================================================
 =======================================================================================================================
 """
-
 
 
 @njit()
@@ -61,7 +60,11 @@ def jeu_de_la_vie(nb_lignes, nb_colonnes, grille):
 def combinaison_numba(nb_lignes, nb_colonnes, nb_cellules):
     # Initialisation de variables utiles:
     total = 2**nb_cellules
-    intervalle = total // 100  # pour l'affichage de l'avancée
+
+    if nb_cellules > 100:
+        intervalle = total // 100  # pour l'affichage de l'avancée
+    else:
+        intervalle = 1
 
     # Nombre de combinaisons stables
     nb_combinaisons_stables = 0
@@ -232,8 +235,10 @@ class CombinaisonSansBords(Affichage):
         )
         print("Temps écoulé:", time.time() - start_time)
         messagebox.showinfo(
-            "Nombres de combinaisons stables.",
-            f"Nombre de combinaisons stables: {self.nb_combinaisons_stables-1}",
+            "Calcul terminé",
+            "Nombre de combinaisons stables : {} \n Temps écoulé : {:.2F}s".format(
+                self.nb_combinaisons_stables - 1, time.time() - start_time
+            ),
         )
 
         # permet de faire défiler les combinaisons avec touches gauches et droite

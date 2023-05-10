@@ -7,7 +7,7 @@ from tkinter import messagebox
 from tqdm import tqdm
 from numba import njit, prange
 
-#---COMBINAISON AVEC LES BORDS : ON PRENDS EN COMPTE LES CELLULES EN DEHORS DE LA GRILLE EN FAISANT LES CALCULS SUR UN GRILLE DE TAILLE N+2xN+2---#
+# ---COMBINAISON AVEC LES BORDS : ON PRENDS EN COMPTE LES CELLULES EN DEHORS DE LA GRILLE EN FAISANT LES CALCULS SUR UN GRILLE DE TAILLE N+2xN+2---#
 
 """
 =======================================================================================================================
@@ -20,60 +20,66 @@ from numba import njit, prange
 def jeu_de_la_vie(nb_lignes, nb_colonnes, grille):
     """
     Fonction permettant de calculer le jeu de la vie à l'instant t+1 depuis l'instant t.
-    in: grille (tableau NumPy avec 0 et 1)
-    out: grille_suivante (tableau NumPy avec 0 et 1)
+    in: grille (tableau NumPy avec 0 et 1) de taille nb_lignes+2 x nb_colonnes+2
+    out: grille_suivante (tableau NumPy avec 0 et 1) de taille nb_lignes+2 x nb_colonnes+2
     """
- 
-    
-    # On ajoute une bordure de cellules mortes tout autour de la grille
-    nouvelle_grille = np.zeros((nb_lignes, nb_colonnes), dtype=np.int32)
-    for i in range(1, nb_lignes-1):
-        for j in range(1, nb_colonnes - 1):
-            nouvelle_grille[i][j] = grille[i][j]
-    # Parcourir chaque cellule de la grille
+    # copie de 'grille' dans grille suivante pour ne pas modifier 'grille' pendant le calcul
+    grille_suivante = np.zeros((nb_lignes + 2, nb_colonnes + 2), dtype=np.int64)
+    for i in range(nb_lignes + 2):
+        for j in range(nb_colonnes + 2):
+            grille_suivante[i][j] = grille[i][j]
 
-    for ligne in range(nb_lignes):
-        for colonne in range(nb_colonnes):
-            # Calculer le nombre de voisins vivants
+    # on parcourt la grille en incluant les bords
+    for ligne in range(0, nb_lignes + 2):
+        for colonne in range(0, nb_colonnes + 2):
+            # Calculer le nombre de voisins vivants de la cellule (ligne, colonne)
             nb_voisins = 0
             for k in range(ligne - 1, ligne + 2):
                 for l in range(colonne - 1, colonne + 2):
                     if (
                         k >= 0
-                        and k < nb_lignes
+                        and k < nb_lignes + 2
                         and l >= 0
-                        and l < nb_colonnes
+                        and l < nb_colonnes + 2
                         and (k != ligne or l != colonne)
                     ):
-                        nb_voisins += nouvelle_grille[k][l]
+                        nb_voisins += grille[k][l]
 
-            # Appliquer les règles du jeu de la vie
-            if nouvelle_grille[ligne][colonne] == 1:
+            # Appliquer les règles du jeu de la vie sur la grille suivante
+            if grille[ligne][colonne] == 1:
                 if nb_voisins == 3 or nb_voisins == 2:
-                    nouvelle_grille[ligne][colonne] = 1
+                    grille_suivante[ligne][colonne] = 1
                 else:
-                    nouvelle_grille[ligne][colonne] = 0
+                    grille_suivante[ligne][colonne] = 0
             else:
                 if nb_voisins == 3:
-                    nouvelle_grille[ligne][colonne] = 1
-    return nouvelle_grille
+                    grille_suivante[ligne][colonne] = 1
+    return grille_suivante
 
 
 @njit
 def combinaison_numba(nb_lignes, nb_colonnes, nb_cellules):
+    """
+    Fonction qui calcule toutes les combinaisons possibles de cellules vivantes et mortes pour une grille de taille nb_lignes x nb_colonnes
+    in: nb_lignes (int), nb_colonnes (int), nb_cellules (int)
+    out: combinaisons (tableau NumPy avec 0 et 1), nb_combinaisons_stables (int)
+    """
     # Initialisation de variables utiles:
     total = 2**nb_cellules
-    intervalle = total // 100  # pour l'affichage de l'avancée
+
+    if nb_cellules > 100:
+        intervalle = total // 100  # pour l'affichage de l'avancée
+    else:
+        intervalle = 1
 
     # Nombre de combinaisons stables
     nb_combinaisons_stables = 0
 
-    # Initialisation de la liste des combinaisons
+    # Initialisation de la liste des combinaisons et de la combinaison actuelle
     combinaisons = []
-
-    # Calcul de toutes les combinaisons
     combinaison_actuelle = np.zeros((nb_lignes, nb_colonnes), dtype=np.int64)
 
+    # Calcul de toutes les combinaisons possibles sous la forme d'un nombre binaire (de 0 à 2**nb_cellules)
     for bin in range(total):
         # Affichage de l'avancement
         if bin % intervalle == 0:
@@ -81,23 +87,28 @@ def combinaison_numba(nb_lignes, nb_colonnes, nb_cellules):
             progress_str = round(progress, 1)
             print("Progression : ", progress_str, "%")
 
-        #  Calcul de la combinaison
+        #  Calcul de la combinaison actuelle
         for i in range(nb_lignes):
             for j in range(nb_colonnes):
-                combinaison_actuelle[i, j] = (bin >> (i * nb_lignes + j)) & 1
+                combinaison_actuelle[i][j] = (bin >> (i * nb_lignes + j)) & 1
 
-        
-        # Calcul de la grille suivante sur une grille de taille nb_lignes+2 x nb_colonnes+2 avec une grille combinaison_actuelle aussi de taille nb_lignes+2 x nb_colonnes+2
-        grille_suivante = jeu_de_la_vie(nb_lignes+2, nb_colonnes+2, combinaison_actuelle)
-    
-        
-        # Suppression des bords
-        grille_suivante = grille_suivante[1:-1, 1:-1]
-        
+        # On crée une grille de taille nb_lignes+2 x nb_colonnes+2 pour prendre en compte les cellules en dehors de la grille
+        combinaison_actuelle_avec_bords = np.zeros(
+            (nb_lignes + 2, nb_colonnes + 2), dtype=np.int64
+        )
+        combinaison_actuelle_avec_bords[1:-1, 1:-1] = combinaison_actuelle
+
+        # Calcul de la grille suivante sur la grille de taille nb_lignes+2 x nb_colonnes+2
+        grille_suivante = jeu_de_la_vie(
+            nb_lignes, nb_colonnes, combinaison_actuelle_avec_bords
+        )
+
         # Vérification de la stabilité de la combinaison
-        if np.array_equal(grille_suivante, combinaison_actuelle):
+        if np.array_equal(grille_suivante, combinaison_actuelle_avec_bords):
             nb_combinaisons_stables += 1
-            combinaisons.append(grille_suivante)
+            combinaisons.append(
+                grille_suivante[1:-1, 1:-1]
+            )  # On enlève les bords pour l'affichage
 
     return combinaisons, nb_combinaisons_stables
 
@@ -230,7 +241,7 @@ class CombinaisonAvecBords(Affichage):
     def calcul_combinaison(self):
         """
         Fonction permettant de calculer toutes les combinaisons possibles d'une grille avec le jeu de la vie en force brute
-        in: event
+        in: None
         out: None
         """
         self.calcul_fait = True
@@ -240,8 +251,10 @@ class CombinaisonAvecBords(Affichage):
         )
         print("Temps écoulé:", time.time() - start_time)
         messagebox.showinfo(
-            "Nombres de combinaisons stables.",
-            f"Nombre de combinaisons stables: {self.nb_combinaisons_stables-1}",
+            "Calcul terminé",
+            "Nombre de combinaisons stables : {} \n Temps écoulé : {:.2F}s".format(
+                self.nb_combinaisons_stables - 1, time.time() - start_time
+            ),
         )
 
         # permet de faire défiler les combinaisons avec touches gauches et droite
@@ -318,5 +331,5 @@ class CombinaisonAvecBords(Affichage):
 
 
 if __name__ == "__main__":
-    combinaison = CombinaisonAvecBords(4)
+    combinaison = CombinaisonAvecBords(2)
     combinaison.racine.mainloop()

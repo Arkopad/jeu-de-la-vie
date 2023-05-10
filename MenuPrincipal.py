@@ -29,7 +29,7 @@ class MenuPrincipal(Affichage):
         self.nbr_vivant = nbr_vivant
         self.nbr_cases = nbr_cases
         self.liste_police = ("System", "")
-        self.bords = tk.IntVar()
+        self.bords = tk.BooleanVar(value=True)
 
         # Affectation des touches
         self.racine.bind_all("<Key-Escape>", self.echap)
@@ -262,11 +262,11 @@ class MenuPrincipal(Affichage):
         self.parametre_combinaison.resizable(False, False)
         self.parametre_combinaison.title("Paramètres")
 
-        # affichage du curseur pour choisir le nombre de cases de la grille de jeu (3, 4 ou 5)
+        # affichage du curseur pour choisir le nombre de cases de la grille de jeu (2, 3, 4 ou 5)
         self.curseur_nbr_cases = tk.Scale(
             self.parametre_combinaison,
             orient="horizontal",
-            from_=3,
+            from_=2,
             to=5,
             resolution=1,
             tickinterval=1,
@@ -289,11 +289,14 @@ class MenuPrincipal(Affichage):
             bg="#141418",
             fg="#A5A5B5",
             font="System",
-            highlightbackground="#141418",
-            var= self.bords,
+            height=3,
+            highlightthickness=0,
+            var=self.bords,
+            activebackground="#141418",
+            activeforeground="#A5A5B5",
+            selectcolor="#141418",
         )
         self.check_bords.pack(ipady=6, expand=True)
-
 
         # Bouton valider pour enregistrer les paramètres et lancer le mode aléatoire
         self.valider = tk.Button(

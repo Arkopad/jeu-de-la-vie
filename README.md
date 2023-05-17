@@ -31,7 +31,7 @@ pip3 install numba
 ### Lancement 
 
 1. Télécharger le dossier 
-2. Executer le fichier 'MenuPrincpal.py'
+2. Executer le fichier 'MenuPrincipal.py'
 
 #### A propos
 

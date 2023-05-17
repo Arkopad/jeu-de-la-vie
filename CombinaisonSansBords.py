@@ -4,8 +4,7 @@ import MenuPrincipal
 import numpy as np
 import time
 from tkinter import messagebox
-from tqdm import tqdm
-from numba import njit, prange
+from numba import njit
 
 # -----------COMBINAISON SANS LES BORDS : ON NE PRENDS PAS EN COMPTE LES CELLULES EN DEHORS DE LA GRILLE---------------#
 
@@ -58,6 +57,11 @@ def jeu_de_la_vie(nb_lignes, nb_colonnes, grille):
 
 @njit
 def combinaison_numba(nb_lignes, nb_colonnes, nb_cellules):
+    """
+    Fonction permettant de calculer toutes les combinaisons possibles d'une grille avec le jeu de la vie en force brute
+    in: nb_lignes: int, nb_colonnes: int, nb_cellules: int
+    out: combinaisons: list, nb_combinaisons_stables: int
+    """
     # Initialisation de variables utiles:
     total = 2**nb_cellules
 
@@ -154,7 +158,7 @@ class CombinaisonSansBords(Affichage):
         # Label du titre du jeu
         self.titre = tk.Label(
             self.frame_top,
-            text=f"Combinaison {self.ligne}x{self.colonne}",
+            text=f"Combinaison {self.ligne}x{self.colonne} ",
             font=("System", int(float((self.width + self.height) / 50))),
             bg="#010D19",
             fg="#A5A5B5",
@@ -189,20 +193,37 @@ class CombinaisonSansBords(Affichage):
         self.buttons_frame = tk.Frame(self.racine)
         self.buttons_frame.pack(side="bottom")
 
+        self.police_touches = lambda: (
+            "System",
+            int(float((self.width + self.height) / 2) / 30),
+            "bold",
+        )  # Valeur d'actualisation du label du bouton en fonction de la taille de la fenetre
+        self.bouton_touches = tk.Button(
+            master=self.buttons_frame,
+            text="Touches",
+            cursor="hand2",
+            font=self.police_touches(),
+            background="#010D19",
+            foreground="#A5A5B5",
+            command=self.touches,
+        )
+        self.bouton_touches.pack(side="left", fill="x")
+
         self.police_affichage = lambda: (
             "System",
             int(float((self.width + self.height) / 2) / 30),
             "bold",
         )  # Valeur d'actualisation du label du bouton en fonction de la taille de la fenetre
-        self.bouton_afficage = tk.Button(
+        self.bouton_affichage = tk.Button(
             master=self.buttons_frame,
             text="Afficher",
+            cursor="hand2",
             font=self.police_affichage(),
             background="#010D19",
             foreground="#A5A5B5",
             command=self.affichage_combinaison,
         )
-        self.bouton_afficage.pack(side="left", fill="x")
+        self.bouton_affichage.pack(side="left", fill="x")
 
         self.police_fast = lambda: (
             "System",
@@ -212,6 +233,7 @@ class CombinaisonSansBords(Affichage):
         self.calcul_combinaison = tk.Button(
             master=self.buttons_frame,
             text="Calculer",
+            cursor="hand2",
             font=self.police_fast(),
             background="#010D19",
             foreground="#A5A5B5",
@@ -219,13 +241,14 @@ class CombinaisonSansBords(Affichage):
         )
         self.calcul_combinaison.pack(side="left", fill="x")
 
-        self.actualisation(self.bouton_afficage, self.police_affichage)
+        self.actualisation(self.bouton_touches, self.police_touches)
+        self.actualisation(self.bouton_affichage, self.police_affichage)
         self.actualisation(self.calcul_combinaison, self.police_fast)
 
     def calcul_combinaison(self):
         """
         Fonction permettant de calculer toutes les combinaisons possibles d'une grille avec le jeu de la vie en force brute
-        in: event
+        in: None
         out: None
         """
         self.calcul_fait = True
@@ -237,10 +260,13 @@ class CombinaisonSansBords(Affichage):
         messagebox.showinfo(
             "Calcul terminé",
             "Nombre de combinaisons stables : {} \n Temps écoulé : {:.2F}s".format(
-                self.nb_combinaisons_stables - 1, time.time() - start_time
+                self.nb_combinaisons_stables, time.time() - start_time
             ),
         )
 
+        self.titre.config(
+            text=f"Combinaison {self.ligne}x{self.colonne} : 1/{self.nb_combinaisons_stables}"
+        )
         # permet de faire défiler les combinaisons avec touches gauches et droite
         self.racine.bind_all("<Right>", self.defilement_droit)
         self.racine.bind_all("<Left>", self.defilement_gauche)
@@ -259,6 +285,9 @@ class CombinaisonSansBords(Affichage):
                             self.canvases[j][k].config(background="white")
                         else:
                             self.canvases[j][k].config(background="black")
+                self.titre.config(
+                    text=f"Combinaison {self.ligne}x{self.colonne} : {i+1}/{self.nb_combinaisons_stables}"
+                )
                 self.racine.update()
                 self.racine.after(50)
                 self.racine.update()
@@ -266,6 +295,17 @@ class CombinaisonSansBords(Affichage):
             messagebox.showerror(
                 "Erreur", 'Veuillez d\'abord appuyer sur le bouton "Calculer".'
             )
+
+    def touches(self):
+        """
+        Fonction permettant d'afficher les touches
+        in: None
+        out: None
+        """
+        messagebox.showinfo(
+            "Touches",
+            "Touches : \n - Echap : retour au menu principal \n - Flèche gauche : combinaison précédente \n - Flèche droite : combinaison suivante",
+        )
 
     def defilement_droit(self, event):
         """
@@ -282,6 +322,9 @@ class CombinaisonSansBords(Affichage):
                     self.canvases[j][k].config(background="white")
                 else:
                     self.canvases[j][k].config(background="black")
+        self.titre.config(
+            text=f"Combinaison {self.ligne}x{self.colonne} : {self.numero_combinaison+1}/{self.nb_combinaisons_stables}"
+        )
         self.racine.update()
 
     def defilement_gauche(self, event):
@@ -299,6 +342,9 @@ class CombinaisonSansBords(Affichage):
                     self.canvases[j][k].config(background="white")
                 else:
                     self.canvases[j][k].config(background="black")
+        self.titre.config(
+            text=f"Combinaison {self.ligne}x{self.colonne} : {self.numero_combinaison+1}/{self.nb_combinaisons_stables}"
+        )
         self.racine.update()
 
     def echap(self, event):

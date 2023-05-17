@@ -205,6 +205,7 @@ class MenuLibre:
             self.valider = tk.Button(
                 self.parametre,
                 text="Valider",
+                cursor="hand2",
                 bg="#010D19",
                 fg="#A5A5B5",
                 font=("System", 15),
@@ -390,7 +391,7 @@ class MenuLibre:
                     if len(grille) > self.nombre_case_y:
                         messagebox.showerror(
                             "Erreur",
-                            "La grille est trop grande pour la fenêtre actuelle, veuillez changez la taille dans les paramètres",
+                            f"La grille est trop grande pour la fenêtre actuelle, veuillez changez la taille dans les paramètres (F4/CTRL+G, taille {len(grille)})",
                         )
                         return
 

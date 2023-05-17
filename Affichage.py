@@ -1,28 +1,7 @@
 # Fichier permettant d'initialiser les fenetres des différents menus et options du jeu de la vie.
 import tkinter as tk
 
-# Décorateurs:
-"""
-def fenetre(cls) -> str:
-    class Wrapped(cls):
-        def __init__(self, *args, **kwargs):
-            #print("-----------------------------------------------------------------------------------------------------------------------")
-            #print(f"Lancement de la fenetre {cls.__name__} avec les arguments {args} et {kwargs}...")
-            super().__init__(*args, **kwargs)
-            #print("-----------------------------------------------------------------------------------------------------------------------", end="\n\n")
-    return Wrapped
 
-def fonction(fonction) -> str:
-    def Wrapped(*args, **kwargs):
-        #print("-----------------------------------------------------------------------------------------------------------------------")
-        #print(f"Appel de la fonction {fonction.__name__} avec les arguments {args} et {kwargs}...")
-        fonction(*args, **kwargs)
-        #print("-----------------------------------------------------------------------------------------------------------------------", end="\n\n")
-    return Wrapped
-"""
-
-
-# @fenetre
 class Affichage:
     def __init__(
         self,
@@ -78,7 +57,6 @@ class Affichage:
             ),
         )
 
-    # @fonction
     def actualisation(self, widget, rapport) -> None:
         """
         Fonction qui prend en entrée un widget et une fonction lambda qui permet de mettre à jour le widget, et qui l'ajoute à la liste des widgets à actualiser.
@@ -87,7 +65,6 @@ class Affichage:
         """
         self.actualisation_widgets.append((widget, rapport))
 
-    # @fonction
     # Redimensionnement des cellules
     def fenetre_redimensionnee(self, event) -> None:
         """
@@ -115,7 +92,6 @@ class Affichage:
                         )
 
     # Redimensionnement des labels et boutons
-    # @fonction
     def font_redimensionnement(self, event) -> None:
         """
         Fonction permettant de redimensionner les labels en passant par le font.
@@ -147,7 +123,6 @@ class Affichage:
             # print(f"boutton actualisé:{button.cget('text')}, nouvelle taille du font:{value()}")
             button.config(font=value())
 
-    # @fonction
     def frame_redimensionnement(self, event) -> None:
         """
         Fonction permettant de redimensionner les bordures des frames.

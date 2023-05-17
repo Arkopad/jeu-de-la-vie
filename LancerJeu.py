@@ -12,12 +12,9 @@ import MenuPrincipal
 
 class LancerJeu:
     def __init__(self, nbr_vivant, nbr_cases, mode, grille):
-        # CHANGER ICI LA VITESSE SELON LE SYSTEME D'EXPLOITATION (Windows = 0, Linux = 0.05 ou 0.01)
-        self.vitesse = 0
-
         # Création de la fenêtre
         self.racine = tk.Tk()
-        self.racine.title("Jeu de la vie")
+        self.racine.title(f"Jeu de la vie - Mode {mode}")
         self.racine.geometry("1280x720")
         icone = tk.PhotoImage(file="icon.png")
         self.racine.iconphoto(True, icone)
@@ -382,8 +379,6 @@ class LancerJeu:
 
                     # Changement de couleur de la cellule sur le GUI
                     self.cellule[ligne][colonne].config(bg=bg)
-
-            time.sleep(self.vitesse)
 
             # affichages du nombre de tours effectués
             gene = str(i) + "e tour"

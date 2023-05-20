@@ -1,5 +1,7 @@
 ## README
 
+\emoji{smiley}
+
 ### Prérequis
 
 Les librairies suivantes sont nécéssaires pour lancer le programme :
@@ -27,6 +29,7 @@ pip3 install tqdm
 ```sh
 pip3 install numba
 ```
+(Malgré nos efforts, en mode plein écran la grille peut ne pas être centrée sur l'écran. Dans ce cas, revenir en mode fenêtré puis retrourner en mode plein écran jusqu'a ce que la grille soit placée correctement)
 
 ### Lancement 
 
@@ -53,3 +56,5 @@ Etudiants 2e année INSA Lyon
 formateur utilisé : Black
 
 ![Jeu de la vie](https://cdn-icons-png.flaticon.com/512/4071/4071999.png "Jeu de la vie")
+
+\usepackage{emoji}

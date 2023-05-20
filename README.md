@@ -1,4 +1,5 @@
 ## README
+\usepackage{emoji}
 
 \emoji{smiley}
 
@@ -57,4 +58,3 @@ formateur utilisé : Black
 
 ![Jeu de la vie](https://cdn-icons-png.flaticon.com/512/4071/4071999.png "Jeu de la vie")
 
-\usepackage{emoji}

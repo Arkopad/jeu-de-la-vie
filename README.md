@@ -27,7 +27,7 @@ pip3 install tqdm
 ```sh
 pip3 install numba
 ```
-(⚠️ Malgré nos efforts, en mode plein écran la grille peut ne pas être centrée sur l'écran. Dans ce cas, revenir en mode fenêtré puis retrourner en mode plein écran jusqu'a ce que la grille soit placée correctement ⚠️)
+⚠️ Malgré nos efforts, en mode plein écran la grille peut ne pas être centrée sur l'écran. Dans ce cas, revenir en mode fenêtré puis retrourner en mode plein écran jusqu'a ce que la grille soit placée correctement 
 
 ### Lancement 
 

@@ -16,12 +16,6 @@ pip3 install tkinter
 pip3 install numpy
 ```
 
-- tqdm
-
-```sh
-pip3 install tqdm
-```
-
 - numba
 
 ```sh
